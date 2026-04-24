@@ -36,7 +36,7 @@ function InventarioPage({
   // 🔥 CARGAR PRODUCTOS DESDE BACKEND
   const obtenerProductos = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/productos");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/productos`);
 
       const productosAdaptados = res.data.map((p) => ({
         ...p,

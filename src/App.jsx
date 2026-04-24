@@ -81,7 +81,7 @@ useEffect(() => {
 
   const obtenerProductosInicial = async () => {
   try {
-    const res = await axios.get("http://localhost:3000/productos");
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/productos`);
 
     const data = res.data.map((p) => ({
       id: p.id,

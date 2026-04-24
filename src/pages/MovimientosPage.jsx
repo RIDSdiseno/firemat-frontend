@@ -53,7 +53,7 @@ function MovimientosPage() {
   // 🔹 obtener movimientos
   const obtenerMovimientos = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/movimientos");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/movimientos`);
 
       const data = res.data.map((m) => ({
   id: m.id,
@@ -89,7 +89,7 @@ function MovimientosPage() {
   // 🔹 obtener productos
   const obtenerProductos = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/productos");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/productos`);
       setProductos(res.data);
     } catch (error) {
       console.error("Error al cargar productos:", error);
