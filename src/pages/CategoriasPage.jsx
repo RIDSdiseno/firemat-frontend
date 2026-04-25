@@ -12,6 +12,13 @@ function CategoriasPage({ categories, setCategories, products, showAlert }) {
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [categoryName, setCategoryName] = useState("");
 
+  const obtenerCategorias = async () => {
+  const res = await axios.get(
+    `${import.meta.env.VITE_API_URL}/api/categorias`
+  );
+  setCategories(res.data);
+};
+
   const resetForm = () => {
     setEditingIndex(null);
     setCategoryName("");
@@ -24,7 +31,7 @@ function CategoriasPage({ categories, setCategories, products, showAlert }) {
 
   const openEditModal = (index) => {
     setEditingIndex(index);
-    setCategoryName(categories[index] || "");
+    setCategoryName(categories[index]?.nombre || "");
     setIsModalOpen(true);
   };
 
@@ -33,47 +40,65 @@ function CategoriasPage({ categories, setCategories, products, showAlert }) {
     resetForm();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const nameClean = categoryName.trim();
-    if (!nameClean) {
-      showAlert("El nombre de la categoria es obligatorio.", "Datos incompletos");
-      return;
-    }
+  const nameClean = categoryName.trim();
 
-    const exists = categories.some((cat, i) => {
-      if (editingIndex !== null && i === editingIndex) return false;
-      return normalize(cat) === normalize(nameClean);
-    });
+  if (!nameClean) {
+    showAlert("El nombre de la categoria es obligatorio.", "Datos incompletos");
+    return;
+  }
 
-    if (exists) {
-      showAlert(
-        `Ya existe una categoria con el nombre "${nameClean}".`,
-        "Nombre duplicado"
-      );
-      return;
-    }
+  const exists = categories.some((cat, i) => {
+    if (editingIndex !== null && i === editingIndex) return false;
+    return normalize(cat.nombre) === normalize(nameClean);
+  });
 
+  if (exists) {
+    showAlert(
+      `Ya existe una categoria con el nombre "${nameClean}".`,
+      "Nombre duplicado"
+    );
+    return;
+  }
+
+  try {
     if (editingIndex === null) {
-      setCategories((prev) => [...prev, nameClean]);
-      showAlert(`Categoria "${nameClean}" creada correctamente.`, "Categoria creada");
-    } else {
-      const oldName = categories[editingIndex];
-
-      const updatedCategories = categories.map((cat, idx) =>
-        idx === editingIndex ? nameClean : cat
+      // 🔥 CREAR EN BACKEND
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/categorias`,
+        { nombre: nameClean }
       );
-      setCategories(updatedCategories);
 
       showAlert(
-        `Categoria actualizada de "${oldName}" a "${nameClean}".`,
+        `Categoria "${nameClean}" creada correctamente.`,
+        "Categoria creada"
+      );
+    } else {
+      // 🔥 EDITAR EN BACKEND
+      const categoria = categories[editingIndex];
+
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/categorias/${categoria.id}`,
+        { nombre: nameClean }
+      );
+
+      showAlert(
+        `Categoria actualizada correctamente.`,
         "Categoria actualizada"
       );
     }
 
+    // 🔥 RECARGAR DESDE BD (CLAVE)
+    await obtenerCategorias();
+
     closeModal();
-  };
+  } catch (error) {
+    console.error(error);
+    showAlert("Error al guardar categoria", "Error");
+  }
+};
 
   const handleUpdate = async (id) => {
     try {
@@ -91,7 +116,7 @@ function CategoriasPage({ categories, setCategories, products, showAlert }) {
   };
 
   const handleDelete = (index) => {
-    const name = categories[index];
+    const name = categories[index].nombre;
 
     if (!window.confirm(`¿Seguro que deseas eliminar la categoria "${name}"?`)) {
       return;
@@ -173,7 +198,7 @@ function CategoriasPage({ categories, setCategories, products, showAlert }) {
                 categories.map((cat, idx) => {
                   // 🔥 CORRECCIÓN CLAVE AQUÍ
                   const count = products.filter(
-                    (p) => normalize(p.category) === normalize(cat)
+                    (p) => normalize(p.category) === normalize(cat.nombre)
                   ).length;
 
                   return (
@@ -231,7 +256,7 @@ function CategoriasPage({ categories, setCategories, products, showAlert }) {
                         type="button"
                         onClick={() => {
                           setEditingIndex(idx);
-                          setCategoryName(cat);
+                          setCategoryName(cat.nombre);
                         }}
                         className="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white"
                         >
