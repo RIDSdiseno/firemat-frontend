@@ -147,6 +147,11 @@ function ProductosPage({
     return;
   }
 
+  if (!form.category) {
+  showAlert("Debes seleccionar una categoría", "Error");
+  return;
+}
+
   const docRefClean = form.docRef.trim();
 
   if (!docRefClean) {
@@ -172,7 +177,7 @@ function ProductosPage({
       ubicacion: form.location.trim(),
       activo: form.status === "Activo",
       imagen: form.imageUrl, // 👈 AGREGAR
-      criticidad: form.criticidad,
+      criticidad: form.criticidad || "media",
     };
 
     if (editingId === null) {
