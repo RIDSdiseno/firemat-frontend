@@ -186,10 +186,10 @@ function ReportPanel({ products = [], movements = [], categories = [], onNotify 
             >
               <option value="">Todas las categorias</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+                <option key={cat.id} value={cat.nombre}>
+                  {cat.nombre}
+                  </option>
+                ))}
             </select>
           )}
 
